@@ -28,7 +28,7 @@ videoEncHwType=0
 
 [rtc]  
 iceTransportPolicy=0  
-iceCandidateType=0  
+iceCandidateType=2  
 iceServerPort=3478  //coturn port  
 iceServerIP=192.168.0.104 //coturn IP  
 iceUserName=metartc //turn username  
