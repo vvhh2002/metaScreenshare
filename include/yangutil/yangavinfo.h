@@ -429,6 +429,12 @@ typedef enum {
 
 
 typedef struct YangAudioInfo {
+
+	yangbool enableMono;
+	yangbool enableAudioProcess;
+	yangbool enableAudioFec;
+	yangbool enableAudioHeader;
+
 	int32_t  sample;
 	int32_t  channel;
 	int32_t  frameSize;
@@ -441,10 +447,7 @@ typedef struct YangAudioInfo {
 
 	YangAudioCodec audioEncoderType;
 
-	yangbool enableMono;
-	yangbool enableAudioProcess;
-	yangbool enableAudioFec;
-	yangbool enableAudioHeader;
+
 
 	int32_t  aecBufferFrames;
 	int32_t  audioCacheSize;
@@ -499,15 +502,15 @@ typedef struct YangVideoEncInfo {
 }YangVideoEncInfo;
 
 typedef struct YangSysInfo {
-	YangIpFamilyType familyType;
 	yangbool enableHttps;
 	yangbool enableLogFile;
+	int16_t  mediaServer;
 
-	int32_t  mediaServer;
+	YangIpFamilyType familyType;
 	YangIpcServerType ipcServerType;
-
+#if Yang_Enable_Meeting
 	int32_t userId;
-
+#endif
 	int32_t  rtmpPort;
 	int32_t  httpPort;
 	int32_t  transType;
@@ -516,11 +519,11 @@ typedef struct YangSysInfo {
 }YangSysInfo;
 
 typedef struct YangRtcInfo {
-	yangbool enableNetEQ;
-	yangbool enablePacer;
+
 	yangbool enableFec;
-	
-	yangbool enableHttpServerSdp;
+	yangbool enablePacer;
+	yangbool isControlled;
+	yangbool enableSdpCandidate;
 
 	int32_t  sessionTimeout;
 	int32_t  iceCandidateType;
@@ -539,7 +542,6 @@ typedef struct YangRtcInfo {
 
 	int32_t maxPacerDelayTime;
 	int32_t nackPktCount;
-
 
 	char iceServerIP[64];
 	char iceUserName[32];
@@ -580,18 +582,6 @@ typedef struct YangAVInfo{
 
 
 typedef struct{
-	void* context;
-	void (*receiveData)(void* context,YangFrame* msgFrame);
-}YangChannelDataRecvI;
-
-typedef struct{
-	void* context;
-	void (*sendData)(void* context,YangFrame* msgFrame);
-}YangChannelDataSendI;
-
-
-
-typedef struct{
 	void* session;
 	void (*onAudioData)(void* session,YangFrame* pframe);
 	void (*onVideoData)(void* session,YangFrame* pframe);
@@ -602,7 +592,15 @@ typedef struct{
 	yangbool (*enable)(void* session);
 }YangCodecEnable;
 
+typedef struct{
+	void* context;
+	void (*receiveData)(void* context,YangFrame* msgFrame);
+}YangChannelDataRecvI;
 
+typedef struct{
+	void* context;
+	void (*sendData)(void* context,YangFrame* msgFrame);
+}YangChannelDataSendI;
 
 typedef struct{
  void* context;
@@ -642,18 +640,12 @@ typedef struct{
 }YangRtcCallback;
 
 typedef struct  {
-	char url[256];
-	char remoteIp[64];
-	char app[32];
-	char stream[128];
 	YangSslCallback sslCallback;
 	YangRtcCallback rtcCallback;
 	YangIceCallback iceCallback;
 	YangReceiveCallback recvCallback;
 	YangEstimateCallback estCallback;
 }YangPeerCallback;
-
-
 
 typedef struct{
 	int32_t enableAudioFec;
@@ -671,14 +663,10 @@ typedef struct{
 }YangPushVideoInfo;
 
 typedef struct{
-
-	yangbool enableHttps;
-	yangbool isControlled;
-	int16_t mediaServer;
-
 	int32_t uid;
 	int32_t userId;
 	int32_t remotePort;
+	YangIceMode iceMode;
 	YangIpFamilyType familyType;
 	YangRtcDirection direction;
 

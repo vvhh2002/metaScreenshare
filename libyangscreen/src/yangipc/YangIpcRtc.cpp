@@ -99,7 +99,7 @@ int32_t YangIpcRtc::connect( char *sdp,
 	m_param.pushVideo.fps = 30;
 
 	m_param.uid = uid;
-	m_param.isControlled = yangtrue;
+	m_param.rtc.isControlled = yangtrue;
 	m_param.rtc.rtcLocalPort = 17000;
 	YangPeerConnection8* peer = yang_create_peerConnection8(&m_param,this,this,this,this);
 
@@ -298,7 +298,7 @@ YangIpcRtc::YangIpcRtc(YangAVInfo *avinfo,YangIpcDataCallback* dataCallback, Yan
 	yang_memset(&m_param,0,sizeof(YangPeerInfo));
 	yang_peerConn_initPeerParam(&m_param);
 	yang_memcpy(&m_param.rtc, &m_avinfo->rtc, sizeof(YangRtcInfo));
-	m_param.isControlled = yangtrue;
+	m_param.rtc.isControlled = yangtrue;
 	
 	m_peer = NULL;
 	m_pacer = NULL;

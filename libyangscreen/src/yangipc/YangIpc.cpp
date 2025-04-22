@@ -141,7 +141,7 @@ YangIpc::YangIpc(YangIpcConfig* config){
 
 	m_videoEncoder=config->videoEncoder;
 	m_avinfo = config->avinfo;
-	m_avinfo->rtc.enableHttpServerSdp = yangfalse;
+	m_avinfo->rtc.enableSdpCandidate = yangfalse;
 
 
 	if(config->dataCallback){
@@ -163,7 +163,7 @@ YangIpc::YangIpc(YangIpcConfig* config){
 	getIpcHandle(&m_ipcHandle);
 	m_mqttServer = (YangIpcMessageServer*)yang_calloc(sizeof(YangIpcMessageServer), 1);
 	yang_create_ipcmessageServer(m_mqttServer, &m_ipcHandle, m_dataMsg, m_avinfo);
-	config->avinfo->rtc.enableHttpServerSdp=yangfalse;
+	config->avinfo->rtc.enableSdpCandidate =yangfalse;
 	
 }
 

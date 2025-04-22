@@ -28,6 +28,11 @@ typedef enum{
 	YangTransportRelay
 }YangIceTransportPolicy;
 
+typedef enum{
+	YangIceModeFull,
+	YangIceModeLite
+}YangIceMode;
+
 typedef enum {
 	YangIceNew,
     YangIceSuccess,
@@ -120,10 +125,10 @@ typedef enum{
 
 
 typedef struct YangRtcInfo {
-	yangbool enableNetEQ;
-	yangbool enablePacer;
 	yangbool enableFec;
-	yangbool enableHttpServerSdp;
+	yangbool enablePacer;
+	yangbool isControlled;
+	yangbool enableSdpCandidate;
 
 	int32_t  sessionTimeout;
 	int32_t  iceCandidateType;
@@ -148,14 +153,11 @@ typedef struct YangRtcInfo {
 	char icePassword[64];
 }YangRtcInfo;
 
-typedef struct {
-	yangbool enableHttps;
-	yangbool isControlled;
-	int16_t mediaServer;
-
+typedef struct{
 	int32_t uid;
 	int32_t userId;
 	int32_t remotePort;
+	YangIceMode iceMode;
 	YangIpFamilyType familyType;
 	YangRtcDirection direction;
 
@@ -195,53 +197,50 @@ class YangCallbackRtc{
 public:
 	YangCallbackRtc(){};
 	virtual ~YangCallbackRtc(){};
-	virtual void setMediaConfig(int32_t  puid,YangAudioParam* audio,YangVideoParam* video)=0;
-	virtual void sendRequest(int32_t  puid,uint32_t  ssrc,YangRequestType req)=0;
+	virtual void setMediaConfig(int32_t  uid,YangAudioParam* audio,YangVideoParam* video)=0;
+	virtual void sendRequest(int32_t  uid,uint32_t  ssrc,YangRequestType req)=0;
 };
 
-class YangCallbackSslAlert {
+class YangCallbackSslAlert{
 public:
 	YangCallbackSslAlert() {};
 	virtual ~YangCallbackSslAlert() {};
-	virtual void sslCloseAlert(int32_t  uid) = 0;
+	virtual void sslCloseAlert(int32_t  uid)=0;
 };
 
 
 class YangPeerConnection8 {
 public:
-	YangPeerConnection8() {};
-	virtual ~YangPeerConnection8() {};
-	virtual int32_t  addAudioTrack(YangAudioCodec codec) = 0;
-	virtual int32_t  addVideoTrack(YangVideoCodec codec) = 0;
+	YangPeerConnection8(){};
+	virtual ~YangPeerConnection8(){};
+	virtual int32_t  addAudioTrack(YangAudioCodec codec)=0;
+	virtual int32_t  addVideoTrack(YangVideoCodec codec)=0;
 
-	virtual int32_t  addTransceiver(YangMediaTrack media, YangRtcDirection direction) = 0;
+	virtual int32_t  addTransceiver(YangMediaTrack media,YangRtcDirection direction)=0;
 
-	virtual int32_t  createOffer(char** psdp) = 0;
-	virtual int32_t  createAnswer(char* answer) = 0;
-	virtual int32_t  createHttpAnswer(char* answer) = 0;
-	virtual int32_t  createDataChannel() = 0;
+	virtual int32_t  createOffer( char **psdp)=0;
+	virtual int32_t  createAnswer(char* answer)=0;
 
-	virtual int32_t  generateCertificate() = 0;
+	virtual int32_t  createDataChannel()=0;
 
-	virtual int32_t  setLocalDescription(char* sdp) = 0;
-	virtual int32_t  setRemoteDescription(char* sdp) = 0;
+	virtual int32_t  generateCertificate()=0;
 
-	virtual int32_t  connectSfuServer(int32_t mediaServer) = 0;//srs zlm
-	virtual int32_t  connectWhipServer(char* url) = 0;
+	virtual int32_t  setLocalDescription(char* sdp)=0;
+	virtual int32_t  setRemoteDescription(char* sdp)=0;
 
-	virtual int32_t  close() = 0;
+	virtual int32_t  close()=0;
 
-	virtual int32_t  isAlive() = 0;
-	virtual int32_t  isConnected() = 0;
+	virtual yangbool  isAlive()=0;
+	virtual yangbool  isConnected()=0;
 
-	virtual int32_t  on_message(char* data, int32_t nbbyte, YangDataChannelType dtType) = 0;
+	virtual int32_t  on_message(char* data,int32_t nbbyte,YangDataChannelType dtType)=0;
 
-	virtual int32_t  addIceCandidate(char* candidateStr) = 0;
-	virtual int32_t  sendRequestPli() = 0;
+	virtual int32_t  addIceCandidate(char* candidateStr)=0;
+	virtual int32_t  sendRequestPli()=0;
 
 };
 
- void yang_peerConn_initPeerParam(YangPeerInfo* peerInfo);
- YangPeerConnection8* yang_create_peerConnection8(YangPeerInfo* peerInfo, YangCallbackReceive* receive, YangCallbackIce* ice, YangCallbackRtc* rtc, YangCallbackSslAlert* sslAlert);
+YANG_EXPORT_API void yang_peerConn_initPeerParam(YangPeerInfo* peerInfo);
+YANG_EXPORT_API YangPeerConnection8* yang_create_peerConnection8(YangPeerInfo* peerInfo,YangCallbackReceive* receive,YangCallbackIce* ice,YangCallbackRtc* rtc,YangCallbackSslAlert* sslAlert);
 
 #endif /* SRC_YANGPEERCONNECTION8_H_ */

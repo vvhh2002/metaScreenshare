@@ -29,6 +29,6 @@ public:
 	virtual int32_t attachConnection(YangPeerConnection8* conn)=0;
 };
 
-YangRtcPacer* yang_create_rtcPacer(YangPeerInfo* peerInfo);
+YANG_EXPORT_API YangRtcPacer* yang_create_rtcPacer(YangPeerInfo* peerInfo);
 
 #endif /* SRC_YANGRTCPACER_H_ */
