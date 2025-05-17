@@ -118,7 +118,7 @@ int32_t YangIpcRtc::connect( char *sdp,
 	yang_thread_mutex_lock(&m_mutex);
 	m_peer = peer;
 	yang_delete(m_pacer);
-	m_pacer=yang_create_rtcPacer(&m_param);
+	m_pacer=yang_create_rtcPacer(&m_param,yangfalse,yangtrue,NULL);
 	m_pacer->attachConnection(peer);
 	yang_thread_mutex_unlock(&m_mutex);
 	return Yang_Ok;
@@ -176,12 +176,12 @@ void yang_onVideoData(void* psession,YangFrame* videoFrame){
 	}
 
 	if (session->m_enablePacer) {
-		session->m_pacer->bufferVideoFrame(videoFrame->payload, videoFrame->nb, videoFrame->pts, videoFrame->frametype);
+		session->m_pacer->bufferVideoFrame(videoFrame);
 	}else{
 		if(!session->m_isConnected)
 			yang_delete(session->m_peer);
 		if(session->m_peer&&session->m_pacer)
-			session->m_pacer->writeVideoFrame(videoFrame->payload,videoFrame->nb,videoFrame->pts,videoFrame->frametype);
+			session->m_pacer->writeVideoFrame(videoFrame);
 	}
 
 }
@@ -194,16 +194,16 @@ yangbool yang_ipc_rtc_enable(void* psession){
 }
 
 
-void YangIpcRtc::receiveAudio(uint8_t* data,int32_t nb,uint64_t pts){
+void YangIpcRtc::receiveAudio(YangFrame* audioFrame){
 
 }
 //frametype:YANG_Frametype_I YANG_Frametype_P
-void YangIpcRtc::receiveVideo(uint8_t* data,int32_t nb,uint64_t pts,int32_t frametype){
+void YangIpcRtc::receiveVideo(YangFrame* videoFrame){
 
 }
-void YangIpcRtc::receiveMsg(uint8_t* data,int32_t nb,YangDataChannelType dataType){
+void YangIpcRtc::receiveMsg(YangFrame* msgFrame){
 	if (m_dataMsg) 			
-		m_dataMsg->receiveMsg(m_dataMsg->user, 0, data, nb);		
+		m_dataMsg->receiveMsg(m_dataMsg->user, 0, msgFrame->payload, msgFrame->nb);
 }
 
 void YangIpcRtc::onIceStateChange(int32_t  uid,YangIceCandidateState iceState){
@@ -296,7 +296,7 @@ YangIpcRtc::YangIpcRtc(YangAVInfo *avinfo,YangIpcDataCallback* dataCallback, Yan
 	yang_mutex_init(&m_mutex);
 
 	yang_memset(&m_param,0,sizeof(YangPeerInfo));
-	yang_peerConn_initPeerParam(&m_param);
+	yang_init_peerParam(&m_param);
 	yang_memcpy(&m_param.rtc, &m_avinfo->rtc, sizeof(YangRtcInfo));
 	m_param.rtc.isControlled = yangtrue;
 	

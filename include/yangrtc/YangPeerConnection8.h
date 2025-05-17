@@ -1,186 +1,23 @@
-/*
- * YangPeerconnection8.h
- *
- *  Created on: 2025年2月25日
- *      Author: yanggaofeng
- */
+//
+// Copyright (c) 2019-2025 yanggaofeng
+//
 
-#ifndef SRC_YANGPEERCONNECTION8_H_
-#define SRC_YANGPEERCONNECTION8_H_
+#ifndef INCLUDE_YANGRTC_YANGPEERCONNECTION8_H_
+#define INCLUDE_YANGRTC_YANGPEERCONNECTION8_H_
 #include <stdint.h>
-#ifndef INCLUDE_YANGUTIL_YANGAVINFO_H_
-#define INCLUDE_YANGUTIL_YANGAVINFO_H_
 
-typedef  uint8_t yangbool;
-#define yangtrue 1
-#define yangfalse 0
+#include <yangrtc/yangrtcinfo.h>
 
-#define YANG_Frametype_I 1
-#define YANG_Frametype_P 0
-
-typedef enum {
-	Yang_IpFamilyType_IPV4,
-	Yang_IpFamilyType_IPV6
-} YangIpFamilyType;
-
-typedef enum{
-	YangTransportAll,
-	YangTransportRelay
-}YangIceTransportPolicy;
-
-typedef enum{
-	YangIceModeFull,
-	YangIceModeLite
-}YangIceMode;
-
-typedef enum {
-	YangIceNew,
-    YangIceSuccess,
-    YangIceFail
-} YangIceCandidateState;
-
-typedef enum {
-	YangIceGatherNew,
-	YangIceGathering,
-    YangIceGatherComplete
-} YangIceGatheringState;
-
-typedef enum {
-    Yang_Conn_State_New,
-    Yang_Conn_State_Connecting,
-    Yang_Conn_State_Connected,
-    Yang_Conn_State_Disconnected,
-    Yang_Conn_State_Failed,
-    Yang_Conn_State_Closed
-} YangRtcConnectionState;
-typedef enum YangAudioCodec{
-	Yang_AED_AAC,
-	Yang_AED_MP3,
-	Yang_AED_SPEEX,
-	Yang_AED_OPUS,
-	Yang_AED_PCMA,
-	Yang_AED_PCMU
-}YangAudioCodec;
-
-typedef enum{
-	Yang_VED_H264,
-	Yang_VED_H265
-}YangVideoCodec;
-
-typedef enum{
-	YangMediaAudio,
-	YangMediaVideo
-}YangMediaTrack;
-
-typedef enum{
-	YangSendrecv,
-	YangSendonly,
-	YangRecvonly,
-	YangInactive
-}YangRtcDirection;
-
-typedef struct {
-	YangAudioCodec encode;
-	int32_t  sample;
-	int32_t  channel;
-    int32_t  audioClock;
-    int32_t  fec;
-}YangAudioParam;
-
-typedef struct  {
-	YangVideoCodec encode;
-	int32_t  videoClock;
-}YangVideoParam;
-
-typedef enum YangRequestType {
-	Yang_Req_Sendkeyframe,
-	Yang_Req_HighLostPacketRate,
-	Yang_Req_LowLostPacketRate,
-	Yang_Req_Connected,
-	Yang_Req_Disconnected
-}YangRequestType;
-
-typedef struct{
-	int32_t enableAudioFec;
-	int32_t sample;
-	int32_t channel;
-
-	YangAudioCodec  audioEncoderType;
-}YangPushAudioInfo;
-
-typedef struct{
-	int32_t width;
-	int32_t height;
-	int32_t fps;
-	YangVideoCodec  videoEncoderType;
-}YangPushVideoInfo;
-
-typedef enum{
-	YANG_DATA_CHANNEL_DCEP = 50,
-	YANG_DATA_CHANNEL_STRING = 51,
-	YANG_DATA_CHANNEL_BINARY = 53,
-	YANG_DATA_CHANNEL_STRING_EMPTY = 56,
-	YANG_DATA_CHANNEL_BINARY_EMPTY = 57
-}YangDataChannelType;
-
-
-typedef struct YangRtcInfo {
-	yangbool enableFec;
-	yangbool enablePacer;
-	yangbool isControlled;
-	yangbool enableSdpCandidate;
-
-	int32_t  sessionTimeout;
-	int32_t  iceCandidateType;
-	YangIceTransportPolicy iceTransportPolicy;
-
-	int32_t  iceServerPort;
-
-	int32_t  rtcSocketProtocol;
-	int32_t  turnSocketProtocol;
-
-	int32_t  rtcPort;
-	int32_t  rtcLocalPort;
-
-	int32_t turnReqInterval;
-	int32_t maxTurnWaitTime;
-
-	int32_t maxPacerDelayTime;
-	int32_t nackPktCount;
-
-	char iceServerIP[64];
-	char iceUserName[32];
-	char icePassword[64];
-}YangRtcInfo;
-
-typedef struct{
-	int32_t uid;
-	int32_t userId;
-	int32_t remotePort;
-	YangIceMode iceMode;
-	YangIpFamilyType familyType;
-	YangRtcDirection direction;
-
-	YangRtcInfo rtc;
-	YangPushAudioInfo pushAudio;
-	YangPushVideoInfo pushVideo;
-}YangPeerInfo;
-
-#endif
-#if _WIN32
-#define YANG_EXPORT_API __declspec(dllexport)
-#else
-#define YANG_EXPORT_API
-#endif
+#ifdef __cplusplus
 
 class YangCallbackReceive {
 public:
 	YangCallbackReceive(){};
 	virtual ~YangCallbackReceive(){};
-	virtual void receiveAudio(uint8_t* data,int32_t nb,uint64_t pts)=0;
+	virtual void receiveAudio(YangFrame* audioFrame)=0;
 	//frametype:YANG_Frametype_I YANG_Frametype_P
-	virtual void receiveVideo(uint8_t* data,int32_t nb,uint64_t pts,int32_t frametype)=0;
-	virtual void receiveMsg(uint8_t* data,int32_t nb,YangDataChannelType dataType)=0;
+	virtual void receiveVideo(YangFrame* videoFrame)=0;
+	virtual void receiveMsg(YangFrame* msgFrame)=0;
 };
 
 class YangCallbackIce{
@@ -213,6 +50,7 @@ class YangPeerConnection8 {
 public:
 	YangPeerConnection8(){};
 	virtual ~YangPeerConnection8(){};
+	YangPeer m_peer;
 	virtual int32_t  addAudioTrack(YangAudioCodec codec)=0;
 	virtual int32_t  addVideoTrack(YangVideoCodec codec)=0;
 
@@ -233,14 +71,62 @@ public:
 	virtual yangbool  isAlive()=0;
 	virtual yangbool  isConnected()=0;
 
-	virtual int32_t  on_message(char* data,int32_t nbbyte,YangDataChannelType dtType)=0;
+	virtual int32_t  on_audio(YangPushData* audioData)=0;
+	virtual int32_t  on_video(YangPushData* videoData)=0;
+	virtual int32_t  on_message(YangFrame* msgFrame)=0;
 
 	virtual int32_t  addIceCandidate(char* candidateStr)=0;
 	virtual int32_t  sendRequestPli()=0;
 
 };
 
-YANG_EXPORT_API void yang_peerConn_initPeerParam(YangPeerInfo* peerInfo);
+extern "C"{
 YANG_EXPORT_API YangPeerConnection8* yang_create_peerConnection8(YangPeerInfo* peerInfo,YangCallbackReceive* receive,YangCallbackIce* ice,YangCallbackRtc* rtc,YangCallbackSslAlert* sslAlert);
 
-#endif /* SRC_YANGPEERCONNECTION8_H_ */
+
+#else
+
+typedef struct YangPeerConnection8 {
+	YangPeer peer;
+	int32_t  (*addAudioTrack)(YangPeer* peer,YangAudioCodec codec);
+	int32_t  (*addVideoTrack)(YangPeer* peer,YangVideoCodec codec);
+	int32_t  (*addTransceiver)(YangPeer* peer,YangMediaTrack media,YangRtcDirection direction);
+
+	int32_t  (*createOffer)(YangPeer* peer, char **psdp);
+	int32_t  (*createAnswer)(YangPeer* peer,char* answer);
+	int32_t  (*createDataChannel)(YangPeer* peer);
+
+	int32_t  (*generateCertificate)(YangPeer* peer);
+	int32_t  (*setCertificateFile)(YangPeer* peer,char* pkeyfile,char* certfile);
+
+	int32_t  (*setLocalDescription)(YangPeer* peer,char* sdp);
+	int32_t  (*setRemoteDescription)(YangPeer* peer,char* sdp);
+
+	int32_t  (*close)(YangPeer* peer);
+
+	yangbool (*isAlive)(YangPeer* peer);
+	yangbool (*isConnected)(YangPeer* peer);
+
+	int32_t  (*on_audio)(YangPeer* peer,YangPushData *audioData);
+	int32_t  (*on_video)(YangPeer* peer,YangPushData *videoData);
+	int32_t  (*on_message)(YangPeer* peer,YangFrame* msgFrame);
+
+	int32_t  (*addIceCandidate)(YangPeer* peer,char* candidateStr);
+	int32_t  (*sendRequestPli)(YangPeer* peer);
+
+	YangRtcConnectionState (*getConnectionState)(YangPeer* peer);
+	YangIceCandidateType (*getIceCandidateType)(YangPeer* peer);
+}YangPeerConnection8;
+
+YANG_EXPORT_API int32_t yang_create_peerConnection8(YangPeerConnection8* conn);
+YANG_EXPORT_API int32_t yang_destroy_peerConnection8(YangPeerConnection8* conn);
+
+#endif
+
+YANG_EXPORT_API void yang_init_peerParam(YangPeerInfo* peerInfo);
+
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* INCLUDE_YANGRTC_YANGPEERCONNECTION8_H_ */

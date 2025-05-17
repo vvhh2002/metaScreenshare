@@ -37,10 +37,10 @@ public:
 
 
 public:
-	void receiveAudio(uint8_t* data,int32_t nb,uint64_t pts);
+	void receiveAudio(YangFrame* audioFrame);
 	//frametype:YANG_Frametype_I YANG_Frametype_P
-	void receiveVideo(uint8_t* data,int32_t nb,uint64_t pts,int32_t frametype);
-	void receiveMsg(uint8_t* data,int32_t nb,YangDataChannelType dataType);
+	void receiveVideo(YangFrame* videoFrame);
+	void receiveMsg(YangFrame* msgFrame);
 
 	void onIceStateChange(int32_t  uid,YangIceCandidateState iceState);
 	void onConnectionStateChange(int32_t  uid,YangRtcConnectionState connectionState);

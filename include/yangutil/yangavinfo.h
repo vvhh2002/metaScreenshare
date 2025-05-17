@@ -381,6 +381,17 @@ typedef enum{
 }YangMediaTrack;
 
 
+typedef struct{
+	void* session;
+	void (*onAudioData)(void* session,YangFrame* pframe);
+	void (*onVideoData)(void* session,YangFrame* pframe);
+}YangCodecCallback;
+
+typedef struct{
+	void* session;
+	yangbool (*enable)(void* session);
+}YangCodecEnable;
+
 typedef enum YangRequestType {
 	Yang_Req_Sendkeyframe,
 	Yang_Req_HighLostPacketRate,
@@ -582,17 +593,6 @@ typedef struct YangAVInfo{
 
 
 typedef struct{
-	void* session;
-	void (*onAudioData)(void* session,YangFrame* pframe);
-	void (*onVideoData)(void* session,YangFrame* pframe);
-}YangCodecCallback;
-
-typedef struct{
-	void* session;
-	yangbool (*enable)(void* session);
-}YangCodecEnable;
-
-typedef struct{
 	void* context;
 	void (*receiveData)(void* context,YangFrame* msgFrame);
 }YangChannelDataRecvI;
@@ -648,6 +648,16 @@ typedef struct  {
 }YangPeerCallback;
 
 typedef struct{
+	void* pushData;
+}YangPushData;
+
+typedef struct{
+	void* session;
+	int32_t (*on_audio)(void* session,YangPushData* pushData);
+	int32_t (*on_video)(void* session,YangPushData* pushData);
+}YangPacerCallback;
+
+typedef struct{
 	int32_t enableAudioFec;
 	int32_t sample;
 	int32_t channel;
@@ -662,6 +672,9 @@ typedef struct{
 	YangVideoCodec  videoEncoderType;
 }YangPushVideoInfo;
 
+
+
+
 typedef struct{
 	int32_t uid;
 	int32_t userId;
@@ -674,5 +687,11 @@ typedef struct{
 	YangPushAudioInfo pushAudio;
 	YangPushVideoInfo pushVideo;
 }YangPeerInfo;
+
+typedef struct{
+	void* conn;
+	YangPeerInfo peerInfo;
+	YangPeerCallback peerCallback;
+}YangPeer;
 
 #endif /* INCLUDE_YANGUTIL_YANGAVINFO_H_ */
